@@ -40,6 +40,20 @@ def evaluate_classifier(
     return scores
 
 
+def _multihot_encoder(labels):
+    """Convert list of label lists into a 2-D multihot numpy array"""
+    label_set = set()
+    for label_list in labels:
+        label_set = label_set.union(set(label_list))
+    label_set = sorted(label_set)
+
+    multihot_vectors = []
+    for label_list in labels:
+        multihot_vectors.append([1 if x in label_list else 0 for x in label_set])
+
+    return np.array(multihot_vectors)
+
+
 class AbsTaskMultilabelClassification(AbsTask):
     """Abstract class for multioutput classification tasks
     The similarity is computed between pairs and the results are ranked.
