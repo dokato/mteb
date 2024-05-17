@@ -5,11 +5,13 @@ import logging
 from collections import defaultdict
 
 import numpy as np
+from datasets import Dataset, DatasetDict
 from sklearn.base import ClassifierMixin, clone
 from sklearn.metrics import f1_score, label_ranking_average_precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
+from skmultilearn.model_selection import iterative_train_test_split
 
 from .AbsTask import AbsTask
 
@@ -34,6 +36,20 @@ def evaluate_classifier(
     lrap = label_ranking_average_precision_score(y_test, y_pred)
     scores["lrap"] = lrap
     return scores
+
+
+def _multihot_encoder(labels):
+    """Convert list of label lists into a 2-D multihot numpy array"""
+    label_set = set()
+    for label_list in labels:
+        label_set = label_set.union(set(label_list))
+    label_set = sorted(label_set)
+
+    multihot_vectors = []
+    for label_list in labels:
+        multihot_vectors.append([1 if x in label_list else 0 for x in label_set])
+
+    return np.array(multihot_vectors)
 
 
 class AbsTaskMultilabelClassification(AbsTask):
@@ -176,3 +192,33 @@ class AbsTaskMultilabelClassification(AbsTask):
                 for label in y[i]:
                     label_counter[label] += 1
         return sample_indices, idxs
+
+    def stratified_multilabel_subsampling(
+        self,
+        dataset_dict: DatasetDict,
+        seed: int,
+        splits: list[str] = ["test"],
+        label: str = "label",
+        n_samples: int = 2048,
+    ) -> DatasetDict:
+        """Multilabel subsampling the dataset with stratification by the supplied label.
+        Returns a DatasetDict object.
+
+        Args:
+            dataset_dict: the DatasetDict object.
+            seed: the random seed.
+            splits: the splits of the dataset.
+            label: the label with which the stratified sampling is based on.
+            n_samples: Optional, number of samples to subsample. Default is max_n_samples.
+        """
+        for split in splits:
+            n_split = len(dataset_dict[split])
+            X_np = np.arange(n_split).reshape((-1, 1))
+            labels_np = _multihot_encoder(dataset_dict[split][label])
+            _, _, test_idx, _ = iterative_train_test_split(
+                X_np, labels_np, test_size=n_samples / n_split, random_state=seed
+            )
+            dataset_dict.update(
+                {split: Dataset.from_dict(dataset_dict[split][test_idx])}
+            )
+        return dataset_dict
