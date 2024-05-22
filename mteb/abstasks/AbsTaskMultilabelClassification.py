@@ -14,8 +14,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
 from skmultilearn.model_selection import iterative_train_test_split
 
+from ..MTEBResults import ScoresDict
 from .AbsTask import AbsTask
-from .MTEBResults import ScoresDict
 
 logger = logging.getLogger(__name__)
 
