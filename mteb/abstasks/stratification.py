@@ -44,8 +44,11 @@ import itertools
 from sklearn.utils import check_random_state
 
 
-def iterative_train_test_split(X, y, test_size, random_state=None):
+def _iterative_train_test_split(X, y, test_size, random_state=None):
     """Iteratively stratified train/test split
+
+            Slighltly modified from:
+    https://github.com/scikit-multilearn/scikit-multilearn/blob/master/skmultilearn/model_selection/iterative_stratification.py
 
     Parameters
     ----------
@@ -57,8 +60,8 @@ def iterative_train_test_split(X, y, test_size, random_state=None):
 
     Returns
     -------
-    X_train, y_train, X_test, y_test
-        stratified division into train/test split
+    train_indexes, test_indexes
+        indexes of a train/test split
     """
 
     stratifier = IterativeStratification(
@@ -69,10 +72,7 @@ def iterative_train_test_split(X, y, test_size, random_state=None):
     )
     train_indexes, test_indexes = next(stratifier.split(X, y))
 
-    X_train, y_train = X.iloc[train_indexes, :], y.iloc[train_indexes, :]
-    X_test, y_test = X.iloc[test_indexes, :], y.iloc[test_indexes, :]
-
-    return X_train, X_test, y_train, y_test
+    return train_indexes, test_indexes
 
 
 def _fold_tie_break(desired_samples_per_fold, M, random_state=check_random_state(None)):

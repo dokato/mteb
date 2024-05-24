@@ -12,7 +12,7 @@ from sklearn.metrics import f1_score, label_ranking_average_precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
-from mteb.abstasks.stratification import iterative_train_test_split
+from mteb.abstasks.stratification import _iterative_train_test_split
 
 from ..MTEBResults import ScoresDict
 from .AbsTask import AbsTask
@@ -186,7 +186,7 @@ class AbsTaskMultilabelClassification(AbsTask):
             X_np = np.arange(n_split).reshape((-1, 1))
             binarizer = MultiLabelBinarizer()
             labels_np = binarizer.fit_transform(dataset_dict[split][label])
-            _, _, test_idx, _ = iterative_train_test_split(
+            _, test_idx = _iterative_train_test_split(
                 X_np, labels_np, test_size=n_samples / n_split, random_state=seed
             )
             dataset_dict.update(
