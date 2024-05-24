@@ -12,7 +12,7 @@ from sklearn.metrics import f1_score, label_ranking_average_precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
-from skmultilearn.model_selection import iterative_train_test_split
+from mteb.abstasks.stratification import iterative_train_test_split
 
 from ..MTEBResults import ScoresDict
 from .AbsTask import AbsTask

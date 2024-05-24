@@ -40,7 +40,6 @@ dependencies = [
     "typing_extensions",
     "eval_type_backport",
     "polars>=0.20.22",
-    "skmultilearn",
 ]
 
 
